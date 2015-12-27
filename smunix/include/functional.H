@@ -1,6 +1,4 @@
-// -*- C++ -*-
-// Inspired by LLVM compiler implementation of libcxx
-
+// Inspired from implementation of libc++
 #pragma once
 
 #include <type_traits>
@@ -10,10 +8,10 @@
 #include <tuple>
 #include <boost/compressed_pair.hpp>
 
-namespace mstd {
-  // bad_function_call
+namespace smunix {
+
   class bad_function_call : public std::exception {};
-  template<class Fp> class function;
+  template<class Fp, size_t Sz = 3> class function;
 
   namespace details {
     struct any { any(...); };
@@ -29,17 +27,13 @@ namespace mstd {
   namespace details {
     namespace function {
       template<class Rp>
-      struct maybe_derive_from_unary_function
-      {};
+      struct maybe_derive_from_unary_function {};
       template<class Rp, class A1>
-      struct maybe_derive_from_unary_function<Rp(A1)> : public std::unary_function<A1, Rp>
-      {};
+      struct maybe_derive_from_unary_function<Rp(A1)> : public std::unary_function<A1, Rp> {};
       template<class Rp>
-      struct maybe_derive_from_binary_function
-      {};
+      struct maybe_derive_from_binary_function {};
       template<class Rp, class A1, class A2>
-      struct maybe_derive_from_binary_function<Rp(A1, A2)> : public std::binary_function<A1, A2, Rp>
-      {};
+      struct maybe_derive_from_binary_function<Rp(A1, A2)> : public std::binary_function<A1, A2, Rp> {};
 
       template <class Fp>
       bool not_null(Fp const&) { return true; }
@@ -48,7 +42,7 @@ namespace mstd {
       template <class _Ret, class _Class>
       bool not_null(_Ret _Class::*ptr) { return ptr; }
       template <class Fp>
-      bool not_null(mstd::function<Fp> const& f) { return !!f; }
+      bool not_null(smunix::function<Fp> const& f) { return !!f; }
     } // function
   } // details
 
@@ -73,59 +67,34 @@ namespace mstd {
     } // alloc
   } // details
 
-
   namespace details {
     namespace check {
       template <class ..._Tp> struct complete;
       template <> struct complete<> {};
-
       template <class _Hp, class _T0, class ..._Tp> struct complete<_Hp, _T0, _Tp...> : private complete<_Hp>,  private complete<_T0, _Tp...> {};
-
       template <class _Hp> struct complete<_Hp, _Hp> : private complete<_Hp> {};
-
       template <class _Tp> struct complete<_Tp> {
         static_assert(sizeof(_Tp) > 0, "Type is not complete.");
       };
 
       template <class _Tp> struct complete<_Tp&> : private complete<_Tp> {};
-
       template <class _Tp> struct complete<_Tp&&> : private complete<_Tp> {};
-
       template <class _Rp, class ..._Param> struct complete<_Rp (*)(_Param...)> : private complete<_Rp> {};
-
       template <class ..._Param> struct complete<void (*)(_Param...)> {};
-
       template <class _Rp, class ..._Param> struct complete<_Rp (_Param...)> : private complete<_Rp> {};
-
       template <class ..._Param> struct complete<void (_Param...)> {};
-
       template <class _Rp, class _Class, class ..._Param> struct complete<_Rp (_Class::*)(_Param...)> : private complete<_Class> {};
-
       template <class _Rp, class _Class, class ..._Param> struct complete<_Rp (_Class::*)(_Param...) const> : private complete<_Class> {};
-
       template <class _Rp, class _Class, class ..._Param> struct complete<_Rp (_Class::*)(_Param...) volatile> : private complete<_Class> {};
-
       template <class _Rp, class _Class, class ..._Param> struct complete<_Rp (_Class::*)(_Param...) const volatile> : private complete<_Class> {};
-
-#if 1
-
       template <class _Rp, class _Class, class ..._Param> struct complete<_Rp (_Class::*)(_Param...) &> : private complete<_Class> {};
-
       template <class _Rp, class _Class, class ..._Param> struct complete<_Rp (_Class::*)(_Param...) const&> : private complete<_Class> {};
-
       template <class _Rp, class _Class, class ..._Param> struct complete<_Rp (_Class::*)(_Param...) volatile&> : private complete<_Class> {};
-
       template <class _Rp, class _Class, class ..._Param> struct complete<_Rp (_Class::*)(_Param...) const volatile&> : private complete<_Class> {};
-
       template <class _Rp, class _Class, class ..._Param> struct complete<_Rp (_Class::*)(_Param...) &&> : private complete<_Class> {};
-
       template <class _Rp, class _Class, class ..._Param> struct complete<_Rp (_Class::*)(_Param...) const&&> : private complete<_Class> {};
-
       template <class _Rp, class _Class, class ..._Param> struct complete<_Rp (_Class::*)(_Param...) volatile&&> : private complete<_Class> {};
-
       template <class _Rp, class _Class, class ..._Param> struct complete<_Rp (_Class::*)(_Param...) const volatile&&> : private complete<_Class> {};
-#endif
-
       template <class _Rp, class _Class> struct complete<_Rp _Class::*> : private complete<_Class> {};
     } // check
   } // details
@@ -160,19 +129,20 @@ namespace mstd {
       auto call(_Fp&& __f, _Args&& ...__args) -> decltype(std::forward<_Fp>(__f)(std::forward<_Args>(__args)...)) {
         return std::forward<_Fp>(__f)(std::forward<_Args>(__args)...);
       }
-      template <class _Tp, class ..._Args> struct __invoke_return {
+
+      template <class _Tp, class ..._Args> struct call_return {
         typedef decltype(call(std::declval<_Tp>(), std::declval<_Args>()...)) type;
       };
 
       template <class _Ret> struct void_return_wrapper {
         template <class ..._Args> static _Ret call(_Args&&... __args) {
-          return call(std::forward<_Args>(__args)...);
+          return invoke::call(std::forward<_Args>(__args)...);
         }
       };
 
       template <> struct void_return_wrapper<void> {
         template <class ..._Args> static void call(_Args&&... __args) {
-          call(std::forward<_Args>(__args)...);
+          invoke::call(std::forward<_Args>(__args)...);
         }
       };
     } // invoke
@@ -238,7 +208,6 @@ namespace mstd {
         typedef _Rp (_FnType) (_Param..., ...);
       };
 
-#if 1
       template <class _Rp, class _Class, class ..._Param>
       struct member_pointer_imp<_Rp (_Class::*)(_Param...) &, true, false> {
         typedef _Class& _ClassType;
@@ -351,8 +320,6 @@ namespace mstd {
         typedef _Rp (_FnType) (_Param..., ...);
       };
 
-#endif  // 1 
-
       template <class _Rp, class _Class>
       struct member_pointer_imp<_Rp _Class::*, false, true> {
         typedef _Class _ClassType;
@@ -362,11 +329,7 @@ namespace mstd {
       template <class _MP>
       struct member_pointer : public member_pointer_imp<typename std::remove_cv<_MP>::type,
                                                         std::is_member_function_pointer<_MP>::value,
-                                                        std::is_member_object_pointer<_MP>::value> {
-        //     typedef ... _ClassType;
-        //     typedef ... _ReturnType;
-        //     typedef ... _FnType;
-      };
+                                                        std::is_member_object_pointer<_MP>::value> {};
     } // traits
   } // details
 
@@ -379,24 +342,24 @@ namespace mstd {
                 <
                   std::is_member_function_pointer<typename std::remove_reference<_Fp>::type>::value and
                   std::is_base_of<typename std::remove_reference<typename traits::member_pointer<typename std::remove_reference<_Fp>::type>::_ClassType>::type,
-                             typename std::remove_reference<_A0>::type>::value
+                                  typename std::remove_reference<_A0>::type>::value
                   >::type
                 >
-        inline
-        auto
-        call(_Fp&& __f, _A0&& __a0, _Args&& ...__args) -> decltype((std::forward<_A0>(__a0).*__f)(std::forward<_Args>(__args)...));
+      inline
+      auto
+      call(_Fp&& __f, _A0&& __a0, _Args&& ...__args) -> decltype((std::forward<_A0>(__a0).*__f)(std::forward<_Args>(__args)...));
 
       template <class _Fp, class _A0, class ..._Args,
                 class = typename std::enable_if
                 <
                   std::is_member_function_pointer<typename std::remove_reference<_Fp>::type>::value and
                   not std::is_base_of<typename std::remove_reference<typename traits::member_pointer<typename std::remove_reference<_Fp>::type>::_ClassType>::type,
-                                 typename std::remove_reference<_A0>::type>::value
+                                      typename std::remove_reference<_A0>::type>::value
                   >::type
                 >
-        inline
-        auto
-        call(_Fp&& __f, _A0&& __a0, _Args&& ...__args) -> decltype(((*std::forward<_A0>(__a0)).*__f)(std::forward<_Args>(__args)...));
+      inline
+      auto
+      call(_Fp&& __f, _A0&& __a0, _Args&& ...__args) -> decltype(((*std::forward<_A0>(__a0)).*__f)(std::forward<_Args>(__args)...));
 
       template <class _Fp, class _A0,
                 class = typename std::enable_if
@@ -406,21 +369,21 @@ namespace mstd {
                                   typename std::remove_reference<_A0>::type>::value
                   >::type
                 >
-        inline
-        auto
-        call(_Fp&& __f, _A0&& __a0) -> decltype(std::forward<_A0>(__a0).*__f);
+      inline
+      auto
+      call(_Fp&& __f, _A0&& __a0) -> decltype(std::forward<_A0>(__a0).*__f);
 
       template <class _Fp, class _A0,
                 class = typename std::enable_if
                 <
                   std::is_member_object_pointer<typename std::remove_reference<_Fp>::type>::value and
                   not std::is_base_of<typename traits::member_pointer<typename std::remove_reference<_Fp>::type>::_ClassType,
-                                 typename std::remove_reference<_A0>::type>::value
+                                      typename std::remove_reference<_A0>::type>::value
                   >::type
                 >
-        inline
-        auto
-        call(_Fp&& __f, _A0&& __a0) -> decltype((*std::forward<_A0>(__a0)).*__f);
+      inline
+      auto
+      call(_Fp&& __f, _A0&& __a0) -> decltype((*std::forward<_A0>(__a0)).*__f);
 
       template <class _Fp, class ..._Args>
       inline
@@ -533,11 +496,11 @@ namespace mstd {
   } // details
 
   // function
-  template<class Rp, class ...ArgTypes>
-  class function<Rp(ArgTypes...)> : public details::function::maybe_derive_from_unary_function<Rp(ArgTypes...)>,
-                                    public details::function::maybe_derive_from_binary_function<Rp(ArgTypes...)> {
+  template<size_t Sz, class Rp, class ...ArgTypes>
+  struct function<Rp(ArgTypes...), Sz> : public details::function::maybe_derive_from_unary_function<Rp(ArgTypes...)>,
+                                         public details::function::maybe_derive_from_binary_function<Rp(ArgTypes...)> {
     typedef details::function::base<Rp(ArgTypes...)> base;
-    typename std::aligned_storage<3*sizeof(void*)>::type __buf_;
+    typename std::aligned_storage<Sz*sizeof(void*)>::type __buf_;
     base* __f_;
 
     template <class Fp, bool = not std::is_same<Fp, function>::value and details::traits::callable<Fp&, ArgTypes...>::value> struct __callable;
@@ -551,7 +514,6 @@ namespace mstd {
   public:
     typedef Rp result_type;
 
-    // construct/copy/destroy:
     function() noexcept : __f_(0) {}
     function(std::nullptr_t) noexcept : __f_(0) {}
     function(const function&);
@@ -571,29 +533,25 @@ namespace mstd {
     operator=(Fp&&);
     ~function();
 
-    // function modifiers:
     void swap(function&) noexcept;
     template<class Fp, class _Alloc> void assign(Fp&& __f, const _Alloc& __a) {
       function(std::allocator_arg, __a, std::forward<Fp>(__f)).swap(*this);
     }
 
-    // function capacity:
     explicit operator bool() const noexcept { return __f_; }
 
-    // deleted overloads close possible hole in the type system
     template<class _R2, class... ArgTypes2>
-      bool operator==(const function<_R2(ArgTypes2...)>&) const = delete;
+    bool operator==(const function<_R2(ArgTypes2...)>&) const = delete;
     template<class _R2, class... ArgTypes2>
-      bool operator!=(const function<_R2(ArgTypes2...)>&) const = delete;
+    bool operator!=(const function<_R2(ArgTypes2...)>&) const = delete;
   public:
-    // function invocation:
     Rp operator()(ArgTypes...) const;
   };
-} // mstd
+} // smunix
 
-namespace mstd {
-  template<class Rp, class ...ArgTypes>
-  function<Rp(ArgTypes...)>::function(const function& __f)
+namespace smunix {
+  template<size_t Sz, class Rp, class ...ArgTypes>
+  function<Rp(ArgTypes...), Sz>::function(const function& __f)
   {
     if (__f.__f_ == 0)
       __f_ = 0;
@@ -606,10 +564,10 @@ namespace mstd {
       __f_ = __f.__f_->clone();
   }
 
-  template<class Rp, class ...ArgTypes>
+  template<size_t Sz, class Rp, class ...ArgTypes>
   template <class _Alloc>
-  function<Rp(ArgTypes...)>::function(std::allocator_arg_t, const _Alloc&,
-                                      const function& __f)
+  function<Rp(ArgTypes...), Sz>::function(std::allocator_arg_t, const _Alloc&,
+                                          const function& __f)
   {
     if (__f.__f_ == 0)
       __f_ = 0;
@@ -622,8 +580,8 @@ namespace mstd {
       __f_ = __f.__f_->clone();
   }
 
-  template<class Rp, class ...ArgTypes>
-  function<Rp(ArgTypes...)>::function(function&& __f) noexcept
+  template<size_t Sz, class Rp, class ...ArgTypes>
+  function<Rp(ArgTypes...), Sz>::function(function&& __f) noexcept
   {
     if (__f.__f_ == 0)
       __f_ = 0;
@@ -639,10 +597,10 @@ namespace mstd {
       }
   }
 
-  template<class Rp, class ...ArgTypes>
+  template<size_t Sz, class Rp, class ...ArgTypes>
   template <class _Alloc>
-  function<Rp(ArgTypes...)>::function(std::allocator_arg_t, const _Alloc&,
-                                      function&& __f)
+  function<Rp(ArgTypes...), Sz>::function(std::allocator_arg_t, const _Alloc&,
+                                          function&& __f)
   {
     if (__f.__f_ == 0)
       __f_ = 0;
@@ -658,76 +616,67 @@ namespace mstd {
       }
   }
 
-  template<class Rp, class ...ArgTypes>
+  template<size_t Sz, class Rp, class ...ArgTypes>
   template <class Fp>
-  function<Rp(ArgTypes...)>::function(Fp __f,
-                                      typename std::enable_if
-                                      <
-                                      __callable<Fp>::value &&
-                                      not std::is_same<Fp, function>::value
-                                      >::type*)
-    : __f_(0)
-  {
-    if (details::function::not_null(__f))
-      {
-        typedef details::function::func<Fp, std::allocator<Fp>, Rp(ArgTypes...)> _FF;
-        if (sizeof(_FF) <= sizeof(__buf_) and std::is_nothrow_copy_constructible<Fp>::value)
-          {
-            __f_ = (base*)&__buf_;
-            ::new (__f_) _FF(std::move(__f));
-          }
-        else
-          {
-            typedef std::allocator<_FF> _Ap;
-            _Ap __a;
-            typedef details::alloc::allocator_destructor<_Ap> _Dp;
-            std::unique_ptr<base, _Dp> __hold(__a.allocate(1), _Dp(__a, 1)); // todo : add std::unique_ptr
-            ::new (__hold.get()) _FF(std::move(__f), std::allocator<Fp>(__a));
-            __f_ = __hold.release();
-          }
+  function<Rp(ArgTypes...), Sz>::function(Fp __f,
+                                          typename std::enable_if
+                                          <
+                                          __callable<Fp>::value and
+                                          not std::is_same<Fp, function>::value
+                                          >::type*)
+    : __f_(0) {
+    if (details::function::not_null(__f)) {
+      typedef details::function::func<Fp, std::allocator<Fp>, Rp(ArgTypes...)> _FF;
+      if (sizeof(_FF) <= sizeof(__buf_) and std::is_nothrow_copy_constructible<Fp>::value) {
+        __f_ = (base*)&__buf_;
+        ::new (__f_) _FF(std::move(__f));
       }
+      else {
+        typedef std::allocator<_FF> _Ap;
+        _Ap __a;
+        typedef details::alloc::allocator_destructor<_Ap> _Dp;
+        std::unique_ptr<base, _Dp> __hold(__a.allocate(1), _Dp(__a, 1));
+        ::new (__hold.get()) _FF(std::move(__f), std::allocator<Fp>(__a));
+        __f_ = __hold.release();
+      }
+    }
   }
 
-  template<class Rp, class ...ArgTypes>
+  template<size_t Sz, class Rp, class ...ArgTypes>
   template <class Fp, class _Alloc>
-  function<Rp(ArgTypes...)>::function(std::allocator_arg_t, const _Alloc& __a0, Fp __f,
-                                      typename std::enable_if<__callable<Fp>::value>::type*)
-    : __f_(0)
-  {
+  function<Rp(ArgTypes...), Sz>::function(std::allocator_arg_t, const _Alloc& __a0, Fp __f,
+                                          typename std::enable_if<__callable<Fp>::value>::type*)
+    : __f_(0) {
     typedef std::allocator_traits<_Alloc> __alloc_traits;
-    if (details::function::not_null(__f))
-      {
-        typedef details::function::func<Fp, _Alloc, Rp(ArgTypes...)> _FF;
-        typedef typename details::alloc::rebind_helper<__alloc_traits, _FF>::type _Ap;
-        _Ap __a(__a0);
-        if (sizeof(_FF) <= sizeof(__buf_) && 
-            std::is_nothrow_copy_constructible<Fp>::value and std::is_nothrow_copy_constructible<_Ap>::value)
-          {
-            __f_ = (base*)&__buf_;
-            ::new (__f_) _FF(std::move(__f), _Alloc(__a));
-          }
-        else
-          {
-            typedef details::alloc::allocator_destructor<_Ap> _Dp;
-            std::unique_ptr<base, _Dp> __hold(__a.allocate(1), _Dp(__a, 1));
-            ::new (__hold.get()) _FF(std::move(__f), _Alloc(__a));
-            __f_ = __hold.release();
-          }
+    if (details::function::not_null(__f)) {
+      typedef details::function::func<Fp, _Alloc, Rp(ArgTypes...)> _FF;
+      typedef typename details::alloc::rebind_helper<__alloc_traits, _FF>::type _Ap;
+      _Ap __a(__a0);
+      if (sizeof(_FF) <= sizeof(__buf_)
+          and std::is_nothrow_copy_constructible<Fp>::value
+          and std::is_nothrow_copy_constructible<_Ap>::value) {
+        __f_ = (base*)&__buf_;
+        ::new (__f_) _FF(std::move(__f), _Alloc(__a));
       }
+      else {
+        typedef details::alloc::allocator_destructor<_Ap> _Dp;
+        std::unique_ptr<base, _Dp> __hold(__a.allocate(1), _Dp(__a, 1));
+        ::new (__hold.get()) _FF(std::move(__f), _Alloc(__a));
+        __f_ = __hold.release();
+      }
+    }
   }
 
-  template<class Rp, class ...ArgTypes>
-  function<Rp(ArgTypes...)>&
-  function<Rp(ArgTypes...)>::operator=(const function& __f)
-  {
+  template<size_t Sz, class Rp, class ...ArgTypes>
+  function<Rp(ArgTypes...), Sz>&
+  function<Rp(ArgTypes...), Sz>::operator=(const function& __f) {
     function(__f).swap(*this);
     return *this;
   }
 
-  template<class Rp, class ...ArgTypes>
-  function<Rp(ArgTypes...)>&
-  function<Rp(ArgTypes...)>::operator=(function&& __f) noexcept
-  {
+  template<size_t Sz, class Rp, class ...ArgTypes>
+  function<Rp(ArgTypes...), Sz>&
+  function<Rp(ArgTypes...), Sz>::operator=(function&& __f) noexcept {
     if (__f_ == (base*)&__buf_)
       __f_->destroy();
     else if (__f_)
@@ -748,9 +697,9 @@ namespace mstd {
     return *this;
   }
 
-  template<class Rp, class ...ArgTypes>
-  function<Rp(ArgTypes...)>&
-  function<Rp(ArgTypes...)>::operator=(std::nullptr_t) noexcept
+  template<size_t Sz, class Rp, class ...ArgTypes>
+  function<Rp(ArgTypes...), Sz>&
+  function<Rp(ArgTypes...), Sz>::operator=(std::nullptr_t) noexcept
   {
     if (__f_ == (base*)&__buf_)
       __f_->destroy();
@@ -760,22 +709,22 @@ namespace mstd {
     return *this;
   }
 
-  template<class Rp, class ...ArgTypes>
+  template<size_t Sz, class Rp, class ...ArgTypes>
   template <class Fp>
   typename std::enable_if
   <
-    function<Rp(ArgTypes...)>::template __callable<typename std::decay<Fp>::type>::value and
-  not std::is_same<typename std::remove_reference<Fp>::type, function<Rp(ArgTypes...)>>::value,
-    function<Rp(ArgTypes...)>&
+    function<Rp(ArgTypes...), Sz>::template __callable<typename std::decay<Fp>::type>::value and
+  not std::is_same<typename std::remove_reference<Fp>::type, function<Rp(ArgTypes...), Sz>>::value,
+    function<Rp(ArgTypes...), Sz>&
     >::type
-    function<Rp(ArgTypes...)>::operator=(Fp&& __f)
+    function<Rp(ArgTypes...), Sz>::operator=(Fp&& __f)
   {
     function(std::forward<Fp>(__f)).swap(*this);
     return *this;
   }
 
-  template<class Rp, class ...ArgTypes>
-  function<Rp(ArgTypes...)>::~function()
+  template<size_t Sz, class Rp, class ...ArgTypes>
+  function<Rp(ArgTypes...), Sz>::~function()
   {
     if (__f_ == (base*)&__buf_)
       __f_->destroy();
@@ -783,9 +732,9 @@ namespace mstd {
       __f_->destroy_deallocate();
   }
 
-  template<class Rp, class ...ArgTypes>
+  template<size_t Sz, class Rp, class ...ArgTypes>
   void
-  function<Rp(ArgTypes...)>::swap(function& __f) noexcept
+  function<Rp(ArgTypes...), Sz>::swap(function& __f) noexcept
   {
     if (__f_ == (base*)&__buf_ && __f.__f_ == (base*)&__f.__buf_)
       {
@@ -820,9 +769,9 @@ namespace mstd {
       std::swap(__f_, __f.__f_);
   }
 
-  template<class Rp, class ...ArgTypes>
+  template<size_t Sz, class Rp, class ...ArgTypes>
   Rp
-  function<Rp(ArgTypes...)>::operator()(ArgTypes... __arg) const
+  function<Rp(ArgTypes...), Sz>::operator()(ArgTypes... __arg) const
   {
 #if 0 // do or don't check ?
     if (__f_ == 0)
@@ -831,30 +780,30 @@ namespace mstd {
     return (*__f_)(std::forward<ArgTypes>(__arg)...);
   }
 
-  template <class Rp, class... ArgTypes>
+  template <size_t Sz, class Rp, class... ArgTypes>
   inline
   bool
-  operator==(const function<Rp(ArgTypes...)>& __f, std::nullptr_t) noexcept { return !__f; }
+  operator==(const function<Rp(ArgTypes...), Sz>& __f, std::nullptr_t) noexcept { return !__f; }
 
-  template <class Rp, class... ArgTypes>
+  template <size_t Sz, class Rp, class... ArgTypes>
   inline
   bool
-  operator==(std::nullptr_t, const function<Rp(ArgTypes...)>& __f) noexcept { return !__f; }
+  operator==(std::nullptr_t, const function<Rp(ArgTypes...), Sz>& __f) noexcept { return !__f; }
 
-  template <class Rp, class... ArgTypes>
+  template <size_t Sz, class Rp, class... ArgTypes>
   inline
   bool
-  operator!=(const function<Rp(ArgTypes...)>& __f, std::nullptr_t) noexcept { return (bool)__f; }
+  operator!=(const function<Rp(ArgTypes...), Sz>& __f, std::nullptr_t) noexcept { return (bool)__f; }
 
-  template <class Rp, class... ArgTypes>
+  template <size_t Sz, class Rp, class... ArgTypes>
   inline
   bool
-  operator!=(std::nullptr_t, const function<Rp(ArgTypes...)>& __f) noexcept { return (bool)__f; }
+  operator!=(std::nullptr_t, const function<Rp(ArgTypes...), Sz>& __f) noexcept { return (bool)__f; }
 
-  template <class Rp, class... ArgTypes>
+  template <size_t Sz, class Rp, class... ArgTypes>
   inline
   void
-  swap(function<Rp(ArgTypes...)>& __x, function<Rp(ArgTypes...)>& __y) noexcept { return __x.swap(__y); }
+  swap(function<Rp(ArgTypes...), Sz>& __x, function<Rp(ArgTypes...), Sz>& __y) noexcept { return __x.swap(__y); }
 
-} // namespace mstd
+} // namespace smunix
 

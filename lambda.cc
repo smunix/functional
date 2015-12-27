@@ -39,8 +39,12 @@ namespace p = std::placeholders;
 
 #include <functional.hh>
 
+namespace test {
+  template<class _Fp> using function = smunix::function<_Fp, 8>; // Sz = 8 * sizeof(void*) <- 8 pointers == 64 bytes
+} // test
+
 struct ThreadTraits {
-  using Element = std::function<void()>;
+  using Element = test::function<void()>;
   using Queue = std::deque<Element>;
 };
 
@@ -120,23 +124,24 @@ private:
   std::condition_variable cv;
   Queue queue;
 };
+#define Assert() do { int *t = nullptr; /* *t = 5; */ } while(0)
 
 struct Actor {
   template<class A> using up = std::unique_ptr<A>;
   template<class A> using sp = std::shared_ptr<A>;
   template<class A> using seq = std::vector<A>;
-  using Element = std::function<void()>;
+  using Element = test::function<void()>;
 
   template <class T>
   struct Custom {
     using value_type = T;
-    // using A = std::__function::__func<T, Custom, void()>;
     Custom() noexcept {}
     template <class U> Custom (const Custom<U>& o) noexcept {
     }
     T* allocate (std::size_t n) {
       auto r = static_cast<T*>(::operator new(n*sizeof(value_type)));
       log(r << ", " << n << ", " << n*sizeof(value_type));
+      Assert();
       return r;
     }
     void deallocate (T* p, std::size_t n) {
@@ -152,8 +157,21 @@ struct Actor {
 
   Actor(Thread<>& thread) : thread(thread) {}
   template<class F> void dispatch(F&& f) {
-    log(this << ", sizeof(f)=" << sizeof(f) << ", (3*sizeof(void*))=" << 3*(sizeof(void*)));
-    static_assert(sizeof(F) < (3*sizeof(void*)), "lambda captures to be allocated on the heap");
+#if 1
+    log(this << ", sizeof(f)=" << sizeof(f) << ", (4*sizeof(void*))=" << 4*(sizeof(void*)));
+    log(std::boolalpha << "std::is_nothrow_copy_constructible<" << cpp::demangle<F>() << ">::value=" << std::is_nothrow_copy_constructible<F>::value);
+    log(std::boolalpha << "std::is_nothrow_copy_constructible<" << cpp::demangle<std::allocator_traits<Custom<Element>>>() << ">::value=" << std::is_nothrow_copy_constructible<std::allocator_traits<Custom<Element>>>::value);
+    using _Fp = F;
+    using _Alloc = Custom<Element>;
+    typedef smunix::details::function::func<_Fp, _Alloc, void()> _FF;
+    typedef std::allocator_traits<_Alloc> __alloc_traits;
+    typedef typename smunix::details::alloc::rebind_helper<__alloc_traits, _FF>::type _Ap;
+    test::function<void()> func (std::allocator_arg, alloc, std::forward<F>(f));
+    log("sizeof(" << cpp::demangle<_FF>() << ")=" << sizeof(_FF) << ", sizeof(func.__buf_)=" << sizeof(func.__buf_) << ", typeof(func.__buf_)=" << cpp::demangle<decltype(func.__buf_)>());
+#endif
+    //////////////////////////////////////////////////////////////////////////////////////////////////
+    // static_assert(sizeof(F) < (3*sizeof(void*)), "lambda captures to be allocated on the heap"); //
+    //////////////////////////////////////////////////////////////////////////////////////////////////
     thread.exec(Element(std::allocator_arg, alloc, f));
   }
 };
@@ -206,7 +224,7 @@ int main() {
   Env<N> env;
   env.init();
   std::this_thread::sleep_for(std::chrono::seconds(1));
-  Dispatch<23>::apply(env); // <- 24 allocates on the heap, [23..1] don't
+  Dispatch<25>::apply(env); // <- 25 allocates on the heap, [24..1] don't
   std::this_thread::sleep_for(std::chrono::seconds(1));
 #else
   std::cout << "max stored locally size: " << sizeof(std::_Nocopy_types) << ", align: " << __alignof__(std::_Nocopy_types) << std::endl;
