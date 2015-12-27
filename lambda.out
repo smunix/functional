@@ -1,0 +1,46 @@
+tid=0x7fff7be39000:line=<152>, func=void Actor::dispatch(F &&) [F = (lambda at lambda.cc:186:21)], 0x7f91cb500040, sizeof(f)=23, (3*sizeof(void*))=24
+tid=0x7fff7be39000:line=<152>, func=void Actor::dispatch(F &&) [F = (lambda at lambda.cc:186:21)], 0x7f91cb500040, sizeof(f)=22, (3*sizeof(void*))=24
+tid=0x700000081000:line=<186>, func=auto Dispatch<23>::apply(Env<1> &&)::(anonymous class)::operator()() [N = 23], 23
+tid=0x7fff7be39000:line=<152>, func=void Actor::dispatch(F &&) [F = (lambda at lambda.cc:186:21)], 0x7f91cb500040, sizeof(f)=21, (3*sizeof(void*))=24
+tid=0x700000081000:line=<186>, func=auto Dispatch<22>::apply(Env<1> &&)::(anonymous class)::operator()() [N = 22], 22
+tid=0x7fff7be39000:line=<152>, func=void Actor::dispatch(F &&) [F = (lambda at lambda.cc:186:21)], 0x7f91cb500040, sizeof(f)=20, (3*sizeof(void*))=24
+tid=0x700000081000:line=<186>, func=auto Dispatch<21>::apply(Env<1> &&)::(anonymous class)::operator()() [N = 21], 21
+tid=0x7fff7be39000:line=<152>, func=void Actor::dispatch(F &&) [F = (lambda at lambda.cc:186:21)], 0x7f91cb500040, sizeof(f)=19, (3*sizeof(void*))=24
+tid=0x700000081000:line=<186>, func=auto Dispatch<20>::apply(Env<1> &&)::(anonymous class)::operator()() [N = 20], 20
+tid=0x7fff7be39000:line=<152>, func=void Actor::dispatch(F &&) [F = (lambda at lambda.cc:186:21)], 0x7f91cb500040, sizeof(f)=18, (3*sizeof(void*))=24
+tid=0x700000081000:line=<186>, func=auto Dispatch<19>::apply(Env<1> &&)::(anonymous class)::operator()() [N = 19], 19
+tid=0x7fff7be39000:line=<152>, func=void Actor::dispatch(F &&) [F = (lambda at lambda.cc:186:21)], 0x7f91cb500040, sizeof(f)=17, (3*sizeof(void*))=24
+tid=0x700000081000:line=<186>, func=auto Dispatch<18>::apply(Env<1> &&)::(anonymous class)::operator()() [N = 18], 18
+tid=0x7fff7be39000:line=<152>, func=void Actor::dispatch(F &&) [F = (lambda at lambda.cc:186:21)], 0x7f91cb500040, sizeof(f)=16, (3*sizeof(void*))=24
+tid=0x700000081000:line=<186>, func=auto Dispatch<17>::apply(Env<1> &&)::(anonymous class)::operator()() [N = 17], 17
+tid=0x7fff7be39000:line=<152>, func=void Actor::dispatch(F &&) [F = (lambda at lambda.cc:186:21)], 0x7f91cb500040, sizeof(f)=15, (3*sizeof(void*))=24
+tid=0x700000081000:line=<186>, func=auto Dispatch<16>::apply(Env<1> &&)::(anonymous class)::operator()() [N = 16], 16
+tid=0x7fff7be39000:line=<152>, func=void Actor::dispatch(F &&) [F = (lambda at lambda.cc:186:21)], 0x7f91cb500040, sizeof(f)=14, (3*sizeof(void*))=24
+tid=0x700000081000:line=<186>, func=auto Dispatch<15>::apply(Env<1> &&)::(anonymous class)::operator()() [N = 15], 15
+tid=0x7fff7be39000:line=<152>, func=void Actor::dispatch(F &&) [F = (lambda at lambda.cc:186:21)], 0x7f91cb500040, sizeof(f)=13, (3*sizeof(void*))=24
+tid=0x700000081000:line=<186>, func=auto Dispatch<14>::apply(Env<1> &&)::(anonymous class)::operator()() [N = 14], 14
+tid=0x7fff7be39000:line=<152>, func=void Actor::dispatch(F &&) [F = (lambda at lambda.cc:186:21)], 0x7f91cb500040, sizeof(f)=12, (3*sizeof(void*))=24
+tid=0x700000081000:line=<186>, func=auto Dispatch<13>::apply(Env<1> &&)::(anonymous class)::operator()() [N = 13], 13
+tid=0x7fff7be39000:line=<152>, func=void Actor::dispatch(F &&) [F = (lambda at lambda.cc:186:21)], 0x7f91cb500040, sizeof(f)=11, (3*sizeof(void*))=24
+tid=0x700000081000:line=<186>, func=auto Dispatch<12>::apply(Env<1> &&)::(anonymous class)::operator()() [N = 12], 12
+tid=0x7fff7be39000:line=<152>, func=void Actor::dispatch(F &&) [F = (lambda at lambda.cc:186:21)], 0x7f91cb500040, sizeof(f)=10, (3*sizeof(void*))=24
+tid=0x700000081000:line=<186>, func=auto Dispatch<11>::apply(Env<1> &&)::(anonymous class)::operator()() [N = 11], 11
+tid=0x7fff7be39000:line=<152>, func=void Actor::dispatch(F &&) [F = (lambda at lambda.cc:186:21)], 0x7f91cb500040, sizeof(f)=9, (3*sizeof(void*))=24
+tid=0x700000081000:line=<186>, func=auto Dispatch<10>::apply(Env<1> &&)::(anonymous class)::operator()() [N = 10], 10
+tid=0x7fff7be39000:line=<152>, func=void Actor::dispatch(F &&) [F = (lambda at lambda.cc:186:21)], 0x7f91cb500040, sizeof(f)=8, (3*sizeof(void*))=24
+tid=0x700000081000:line=<186>, func=auto Dispatch<9>::apply(Env<1> &&)::(anonymous class)::operator()() [N = 9], 9
+tid=0x7fff7be39000:line=<152>, func=void Actor::dispatch(F &&) [F = (lambda at lambda.cc:186:21)], 0x7f91cb500040, sizeof(f)=7, (3*sizeof(void*))=24
+tid=0x700000081000:line=<186>, func=auto Dispatch<8>::apply(Env<1> &&)::(anonymous class)::operator()() [N = 8], 8
+tid=0x7fff7be39000:line=<152>, func=void Actor::dispatch(F &&) [F = (lambda at lambda.cc:186:21)], 0x7f91cb500040, sizeof(f)=6, (3*sizeof(void*))=24
+tid=0x700000081000:line=<186>, func=auto Dispatch<7>::apply(Env<1> &&)::(anonymous class)::operator()() [N = 7], 7
+tid=0x7fff7be39000:line=<152>, func=void Actor::dispatch(F &&) [F = (lambda at lambda.cc:186:21)], 0x7f91cb500040, sizeof(f)=5, (3*sizeof(void*))=24
+tid=0x700000081000:line=<186>, func=auto Dispatch<6>::apply(Env<1> &&)::(anonymous class)::operator()() [N = 6], 6
+tid=0x7fff7be39000:line=<152>, func=void Actor::dispatch(F &&) [F = (lambda at lambda.cc:186:21)], 0x7f91cb500040, sizeof(f)=4, (3*sizeof(void*))=24
+tid=0x700000081000:line=<186>, func=auto Dispatch<5>::apply(Env<1> &&)::(anonymous class)::operator()() [N = 5], 5
+tid=0x7fff7be39000:line=<152>, func=void Actor::dispatch(F &&) [F = (lambda at lambda.cc:186:21)], 0x7f91cb500040, sizeof(f)=3, (3*sizeof(void*))=24
+tid=0x700000081000:line=<186>, func=auto Dispatch<4>::apply(Env<1> &&)::(anonymous class)::operator()() [N = 4], 4
+tid=0x700000081000:line=<186>, func=auto Dispatch<3>::apply(Env<1> &&)::(anonymous class)::operator()() [N = 3], 3
+tid=0x7fff7be39000:line=<152>, func=void Actor::dispatch(F &&) [F = (lambda at lambda.cc:186:21)], 0x7f91cb500040, sizeof(f)=2, (3*sizeof(void*))=24
+tid=0x7fff7be39000:line=<152>, func=void Actor::dispatch(F &&) [F = (lambda at lambda.cc:195:21)], 0x7f91cb500040, sizeof(f)=1, (3*sizeof(void*))=24
+tid=0x700000081000:line=<186>, func=auto Dispatch<2>::apply(Env<1> &&)::(anonymous class)::operator()() [N = 2], 2
+tid=0x700000081000:line=<195>, func=auto Dispatch<1>::apply(Env<1> &&)::(anonymous class)::operator()(), 1
